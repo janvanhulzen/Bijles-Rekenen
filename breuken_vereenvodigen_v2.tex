@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage{blindtext}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{amsmath}
+\usepackage{intcalc}
+\usepackage{forloop}
+\usepackage{arrayjobx}
+
+% Bereken GCD met het algoritme van Euclides
+\newcommand{\Euclides}[2]{% #1 is de teller, #2 is de noemer
+  \ifnum#2=0
+    #1%
+  \else
+    \Euclides{#2}{\intcalcMod{#1}{#2}}% Recursief de functie aanroepen met nieuwe waarden
+  \fi
+}
+
+% Bereken het grootste gehele getal in een breuk 
+\newcommand{\grootsteGeheel}[2]{% #1 is de teller, #2 is de noemer
+\intcalcDiv{#1}{#2}
+}
+
+% Zo simpel mogelijk schrijven van een breuk
+\newcommand{\versimpelBreuk}[2]{% #1 is de teller, #2 is de noemer
+$\grootsteGeheel{#1}{#2}\tfrac{\intcalcSub{\intcalcDiv{#1}{ \Euclides{#1}{#2}}}{\intcalcMul{ \grootsteGeheel{#1}{#2}}{\intcalcDiv{#2}{ \Euclides{#1}{#2} } }}}{\intcalcDiv{#2}{ \Euclides{#1}{#2}}}$%
+}
+
+% Define two separate arrays
+\newarray\Tellers
+\newarray\Noemers
+
+% Populate the arrays
+\readarray{Tellers}{24&74&43&74&51&107&107&65&48&92&31&86&86&70&73&37&104&43&17&33}
+\readarray{Noemers}{14&18&9&8&10&4&2&19&7&6&13&20&11&21&17&12&15&5&16&4}
+
+% Command to fetch data from an array and store it in a command for use in expressions
+\newcommand{\fetchandstore}[3]{% #1 = array name, #2 = index, #3 = macro to store result
+  \csname check#1\endcsname(#2)%
+  \expandafter\edef\csname#3\endcsname{\cachedata}%
+}
+
+% Command to use fetched data in a fraction
+\newcommand{\breuk}[2]{% #1 = index for Tellers, #2 = index for Noemers
+  \fetchandstore{Tellers}{#1}{teller}
+  \fetchandstore{Noemers}{#2}{noemer}
+  \frac{\csname teller\endcsname}{\csname noemer\endcsname}
+}
+
+% Command to use fetched data in a fraction
+\newcommand{\kleinstebreuk}[2]{% #1 = index for Tellers, #2 = index for Noemers
+  \fetchandstore{Tellers}{#1}{teller}
+  \fetchandstore{Noemers}{#2}{noemer}
+  \grootsteGeheel{\csname teller\endcsname}{\csname noemer\endcsname}\tfrac{\intcalcSub{\intcalcDiv{\csname teller\endcsname}{ \Euclides{\csname teller\endcsname}{\csname noemer\endcsname}}}{\intcalcMul{ \grootsteGeheel{\csname teller\endcsname}{\csname noemer\endcsname}}{\intcalcDiv{\csname noemer\endcsname}{ \Euclides{\csname teller\endcsname}{\csname noemer\endcsname} } }}}{\intcalcDiv{\csname noemer\endcsname}{ \Euclides{\csname teller\endcsname}{\csname noemer\endcsname}}}%
+}
+
+
+\begin{document}
+
+\linespread{1.5}\selectfont
+\noindent
+Open source Latex code voor het printen van lagere school sommen, in dit geval het vereenvoudigen van breuken.\\
+De breuk $\tfrac{74}{19}$ kan worden geschreven als \versimpelBreuk{74}{19}\\
+De breuk $\breuk{1}{1}$ kan worden geschreven als $\kleinstebreuk{1}{1}$ \\
+\noindent Vereenvoudig de volgende breuken:\\
+\noindent
+\newcounter{ct}
+\forloop{ct}{1}{\value{ct} < 21}{%
+\arabic{ct}: $\breuk{\arabic{ct}}{\arabic{ct}}=$ \\
+}
+\newpage
+\noindent Antwoorden:\\
+\noindent
+\forloop{ct}{1}{\value{ct} < 21}{%
+\arabic{ct}: De breuk $\breuk{\arabic{ct}}{\arabic{ct}}$ kan worden geschreven als $\kleinstebreuk{\arabic{ct}}{\arabic{ct}}$. \\
+}
+
+
+\end{document}
